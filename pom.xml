@@ -26,6 +26,13 @@
             <artifactId>selenium-java</artifactId>
             <version>4.23.0</version>
         </dependency>
+<dependency>
+    <groupId>org.testng</groupId>
+    <artifactId>testng</artifactId>
+    <version>7.10.2</version> <!-- Use latest stable version -->
+    <scope>test</scope>
+</dependency>
+
 
         <!-- TestNG -->
         <dependency>
