@@ -26,15 +26,8 @@
             <artifactId>selenium-java</artifactId>
             <version>4.23.0</version>
         </dependency>
-<dependency>
-    <groupId>org.testng</groupId>
-    <artifactId>testng</artifactId>
-    <version>7.10.2</version> <!-- Use latest stable version -->
-    <scope>test</scope>
-</dependency>
 
-
-        <!-- TestNG -->
+        <!-- TestNG (only once, for tests) -->
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
@@ -50,8 +43,11 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.2.5</version>
                 <configuration>
+                    <!-- Run TestNG tests -->
                     <includes>
                         <include>**/*Test.java</include>
+                        <include>**/*Tests.java</include>
+                        <include>**/*TestNG.java</include>
                     </includes>
                 </configuration>
             </plugin>
