@@ -15,7 +15,7 @@ pipeline {
             }
         }
 
-        stage('Build Project') {
+        stage('Build with Maven') {
             steps {
                 bat 'mvn clean compile'
             }
@@ -32,9 +32,9 @@ pipeline {
             }
         }
 
-        stage('Run Normal Java Code') {
+        stage('Run Example1.java') {
             steps {
-                bat 'javac src/test/java/basic_Example/Example1.java -d target/classes'
+                bat 'javac -cp target/classes;src/test/java src/test/java/basic_Example/Example1.java -d target/classes'
                 bat 'java -cp target/classes basic_Example.Example1'
             }
         }
