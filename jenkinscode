@@ -1,11 +1,6 @@
 pipeline {
     agent any
 
-    tools {
-        maven 'Maven3'  // Must be configured in Jenkins -> Global Tool Configuration
-        jdk 'JDK17'     // Must be configured in Jenkins
-    }
-
     stages {
         stage('Checkout') {
             steps {
@@ -22,13 +17,13 @@ pipeline {
 
         stage('Build Project') {
             steps {
-                bat 'mvn clean compile' // Windows uses 'bat', not 'sh'
+                bat 'mvn clean compile'
             }
         }
 
         stage('Run JUnit Tests') {
             steps {
-                bat 'mvn test' // Runs both JUnit & TestNG if configured in pom.xml
+                bat 'mvn test'
             }
             post {
                 always {
@@ -37,22 +32,10 @@ pipeline {
             }
         }
 
-        stage('Run TestNG Tests') {
+        stage('Run Normal Java Code') {
             steps {
-                // Ensure your pom.xml has TestNG plugin & testng.xml configured
-                bat 'mvn test -DsuiteXmlFile=testng.xml'
-            }
-            post {
-                always {
-                    junit 'target/surefire-reports/*.xml'
-                }
-            }
-        }
-
-        stage('Run Normal Java Program') {
-            steps {
-                bat 'javac src/main/java/com/example/Main.java -d target/classes'
-                bat 'java -cp target/classes com.example.Main'
+                bat 'javac src/test/java/basic_Example/Example1.java -d target/classes'
+                bat 'java -cp target/classes basic_Example.Example1'
             }
         }
     }
