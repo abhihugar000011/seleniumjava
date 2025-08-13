@@ -1,8 +1,12 @@
 pipeline {
     agent any
-    
+
+    tools {
+        maven 'Maven3'  // Must be configured in Jenkins -> Global Tool Configuration
+        jdk 'JDK17'     // Must be configured in Jenkins
+    }
+
     stages {
-        // Stage 1: Checkout code from public repo
         stage('Checkout') {
             steps {
                 checkout([
@@ -15,33 +19,46 @@ pipeline {
                 ])
             }
         }
-        
-        // Stage 2: Build with Maven
-        stage('Build') {
+
+        stage('Build Project') {
             steps {
-                sh 'mvn clean compile'
+                bat 'mvn clean compile' // Windows uses 'bat', not 'sh'
             }
         }
-        
-        // Stage 3: Run tests
-        stage('Test') {
+
+        stage('Run JUnit Tests') {
             steps {
-                sh 'mvn test'
+                bat 'mvn test' // Runs both JUnit & TestNG if configured in pom.xml
             }
             post {
                 always {
-                    // Publish test results
-                    junit 'target/surefire-reports/**/*.xml'
-                    // Archive test reports
-                    archiveArtifacts artifacts: 'target/surefire-reports/**/*.xml', allowEmptyArchive: true
+                    junit 'target/surefire-reports/*.xml'
                 }
             }
         }
+
+        stage('Run TestNG Tests') {
+            steps {
+                // Ensure your pom.xml has TestNG plugin & testng.xml configured
+                bat 'mvn test -DsuiteXmlFile=testng.xml'
+            }
+            post {
+                always {
+                    junit 'target/surefire-reports/*.xml'
+                }
+            }
+        }
+
+        stage('Run Normal Java Program') {
+            steps {
+                bat 'javac src/main/java/com/example/Main.java -d target/classes'
+                bat 'java -cp target/classes com.example.Main'
+            }
+        }
     }
-    
+
     post {
         always {
-            // Optional: Clean up workspace
             cleanWs()
         }
     }
