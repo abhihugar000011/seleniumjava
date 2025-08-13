@@ -5,13 +5,14 @@ pipeline {
         // Stage 1: Checkout code from public repo
         stage('Checkout') {
             steps {
-                checkout scm: [
+                checkout([
                     $class: 'GitSCM',
                     branches: [[name: '*/main']],
                     extensions: [],
                     userRemoteConfigs: [[
                         url: 'https://github.com/abhihugar000011/seleniumjava.git'
                     ]]
+                ])
             }
         }
         
