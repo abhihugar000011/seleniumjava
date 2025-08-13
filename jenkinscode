@@ -35,16 +35,23 @@ pipeline {
         stage('Run All Plain Java Files') {
             steps {
                 script {
-                    // Find all java files that are not test classes
-                    def javaFiles = findFiles(glob: 'src/test/java/**/*.java')
+                    // Find all .java files in main and test folders
+                    def javaFiles = findFiles(glob: 'src/{main,test}/java/**/*.java')
+
+                    // Exclude test files
                     def plainJavaFiles = javaFiles.findAll { file ->
                         def text = readFile(file.path)
                         return !text.contains('@Test') && !text.contains('extends TestCase')
                     }
 
+                    if (plainJavaFiles.isEmpty()) {
+                        echo "No plain Java files found to execute."
+                        return
+                    }
+
                     // Compile all plain java files
                     bat """
-                        javac -cp target/classes;src/test/java ${plainJavaFiles.collect { it.path }.join(' ')} -d target/classes
+                        javac -cp target/classes;src/main/java;src/test/java ${plainJavaFiles.collect { it.path }.join(' ')} -d target/classes
                     """
 
                     // Run all plain java files
@@ -56,6 +63,7 @@ pipeline {
                             pkg = pkgMatch[0][1] + '.'
                         }
                         def className = file.name.replace('.java', '')
+                        echo "Running: ${pkg}${className}"
                         bat "java -cp target/classes ${pkg}${className}"
                     }
                 }
