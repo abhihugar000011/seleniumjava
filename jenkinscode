@@ -1,14 +1,7 @@
 node {
-    // Tools configuration
-    def mvnHome = tool name: 'Maven3', type: 'maven'
-    def jdkHome = tool name: 'JDK17', type: 'jdk'
-    env.PATH = "${jdkHome}/bin:${mvnHome}/bin:${env.PATH}"
-
     stage('Checkout') {
         checkout([$class: 'GitSCM',
                   branches: [[name: '*/main']],
-                  doGenerateSubmoduleConfigurations: false,
-                  extensions: [],
                   userRemoteConfigs: [[
                       url: 'https://github.com/abhihugar000011/seleniumjava.git',
                       credentialsId: 'github-credentials-id'
@@ -16,21 +9,15 @@ node {
         ])
     }
 
-    stage('Build') {
-        sh "${mvnHome}/bin/mvn clean install -DskipTests=true"
+    stage('Compile Java') {
+        sh 'javac AutomationDemoSite.java Example1.java'
     }
 
-    stage('Run Cucumber Tests') {
-        sh "${mvnHome}/bin/mvn test -Dcucumber.options=\"--plugin pretty --plugin html:target/cucumber-html-report --plugin json:target/cucumber.json\""
+    stage('Run AutomationDemoSite') {
+        sh 'java AutomationDemoSite'
     }
 
-    stage('Publish Reports') {
-        cucumber fileIncludePattern: '**/cucumber.json', sortingMethod: 'ALPHABETICAL'
-    }
-
-    // Post build actions
-    stage('Post Actions') {
-        junit '**/target/surefire-reports/*.xml'
-        archiveArtifacts artifacts: 'target/**/*.html', allowEmptyArchive: true
+    stage('Run Example1') {
+        sh 'java Example1'
     }
 }
