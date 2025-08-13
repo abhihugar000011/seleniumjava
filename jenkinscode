@@ -1,17 +1,15 @@
-node {
-    stage('Checkout') {
-        git branch: 'main', url: 'https://github.com/abhihugar000011/seleniumjava.git'
-    }
-
-    stage('Compile Java') {
-        bat 'javac AutomationDemoSite.java Example1.java'
-    }
-
-    stage('Run AutomationDemoSite') {
-        bat 'java AutomationDemoSite'
-    }
-
-    stage('Run Example1') {
-        bat 'java Example1'
+pipeline {
+    agent any
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/abhihugar000011/seleniumjava.git'
+            }
+        }
+        stage('Build & Test') {
+            steps {
+                bat 'mvn clean test'
+            }
+        }
     }
 }
