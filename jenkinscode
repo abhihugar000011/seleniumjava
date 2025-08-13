@@ -32,41 +32,10 @@ pipeline {
             }
         }
 
-        stage('Run Java Main Files Dynamically') {
+        stage('Run Example1.java') {
             steps {
-                script {
-                    // Find all Java files in src/test/java and src/main/java
-                    def javaFiles = findFiles(glob: 'src/{main,test}/java/**/*.java')
-
-                    // Filter to only files containing a main method
-                    def mainJavaFiles = javaFiles.findAll { file ->
-                        def text = readFile(file.path)
-                        return text.contains('public static void main')
-                    }
-
-                    if (mainJavaFiles.isEmpty()) {
-                        echo "No Java files with main() method found."
-                        return
-                    }
-
-                    // Compile all main files
-                    bat """
-                        javac -cp target/classes;src/main/java;src/test/java ${mainJavaFiles.collect { it.path }.join(' ')} -d target/classes
-                    """
-
-                    // Run each main file
-                    mainJavaFiles.each { file ->
-                        def pkg = ''
-                        def text = readFile(file.path)
-                        def pkgMatch = text =~ /package\s+([\w\.]+);/
-                        if (pkgMatch) {
-                            pkg = pkgMatch[0][1] + '.'
-                        }
-                        def className = file.name.replace('.java', '')
-                        echo "Running: ${pkg}${className}"
-                        bat "java -cp target/classes ${pkg}${className}"
-                    }
-                }
+                bat 'javac -cp target/classes;src/test/java src/test/java/basic_Example/Example1.java -d target/classes'
+                bat 'java -cp target/classes basic_Example.Example1'
             }
         }
     }
