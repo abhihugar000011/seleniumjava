@@ -1,13 +1,7 @@
 node {
     stage('Checkout') {
-        checkout([$class: 'GitSCM',
-                  branches: [[name: '*/main']],
-                  userRemoteConfigs: [[
-                      url: 'https://github.com/abhihugar000011/seleniumjava.git',
-                      credentialsId: 'github-credentials-id'
-                  ]]
-        ])
-    }
+    git branch: 'main', url: 'https://github.com/abhihugar000011/seleniumjava.git'
+}
 
     stage('Compile Java') {
         sh 'javac AutomationDemoSite.java Example1.java'
