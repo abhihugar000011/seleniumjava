@@ -1,16 +1,28 @@
 pipeline {
     agent any
     
+    environment {
+        // Optional: Store GitHub credentials in Jenkins (recommended)
+        GIT_CREDENTIALS = credentials('GITHUB_CREDENTIALS_ID') // Replace with your Jenkins credentials ID
+    }
+    
     stages {
-        // Stage 1: Checkout code from Git
+        // Stage 1: Checkout from YOUR repository (not 'your-repo')
         stage('Checkout') {
             steps {
-                git branch: 'main', 
-                     url: 'https://github.com/your-repo/your-project.git'
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: '*/main']],
+                    extensions: [],
+                    userRemoteConfigs: [[
+                        url: 'https://github.com/abhihugar000011/seleniumjava.git',
+                        credentialsId: 'GITHUB_CREDENTIALS_ID' // Replace with your Jenkins credentials ID
+                    ]]
+                ])
             }
         }
         
-        // Stage 2: Build with Maven (compiles Java code)
+        // Stage 2: Build with Maven
         stage('Build') {
             steps {
                 sh 'mvn clean compile'
@@ -20,32 +32,25 @@ pipeline {
         // Stage 3: Run TestNG/JUnit tests
         stage('Run Unit Tests') {
             steps {
-                sh 'mvn test'  // Runs TestNG/JUnit tests
+                sh 'mvn test'
             }
             post {
                 always {
-                    // Publish JUnit test reports
                     junit 'target/surefire-reports/**/*.xml'
                 }
             }
         }
         
-        // Stage 4: Execute a standalone Java program
+        // Stage 4: Run standalone Java program (if needed)
         stage('Run Normal Java Code') {
             steps {
-                script {
-                    // Example: Run a Java class from the command line
-                    sh '''
-                    java -cp target/classes com.example.MainClass
-                    '''
-                }
+                sh 'java -cp target/classes com.example.MainClass' // Adjust classpath as needed
             }
         }
     }
     
     post {
         always {
-            // Optional: Archive test reports
             archiveArtifacts artifacts: 'target/**/*.xml', allowEmptyArchive: true
         }
     }
