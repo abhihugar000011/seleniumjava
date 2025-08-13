@@ -32,30 +32,30 @@ pipeline {
             }
         }
 
-        stage('Run All Plain Java Files') {
+        stage('Run Java Main Files Dynamically') {
             steps {
                 script {
-                    // Find all .java files in main and test folders
+                    // Find all Java files in src/test/java and src/main/java
                     def javaFiles = findFiles(glob: 'src/{main,test}/java/**/*.java')
 
-                    // Exclude test files
-                    def plainJavaFiles = javaFiles.findAll { file ->
+                    // Filter to only files containing a main method
+                    def mainJavaFiles = javaFiles.findAll { file ->
                         def text = readFile(file.path)
-                        return !text.contains('@Test') && !text.contains('extends TestCase')
+                        return text.contains('public static void main')
                     }
 
-                    if (plainJavaFiles.isEmpty()) {
-                        echo "No plain Java files found to execute."
+                    if (mainJavaFiles.isEmpty()) {
+                        echo "No Java files with main() method found."
                         return
                     }
 
-                    // Compile all plain java files
+                    // Compile all main files
                     bat """
-                        javac -cp target/classes;src/main/java;src/test/java ${plainJavaFiles.collect { it.path }.join(' ')} -d target/classes
+                        javac -cp target/classes;src/main/java;src/test/java ${mainJavaFiles.collect { it.path }.join(' ')} -d target/classes
                     """
 
-                    // Run all plain java files
-                    plainJavaFiles.each { file ->
+                    // Run each main file
+                    mainJavaFiles.each { file ->
                         def pkg = ''
                         def text = readFile(file.path)
                         def pkgMatch = text =~ /package\s+([\w\.]+);/
