@@ -1,17 +1,17 @@
 node {
     stage('Checkout') {
-    git branch: 'main', url: 'https://github.com/abhihugar000011/seleniumjava.git'
-}
+        git branch: 'main', url: 'https://github.com/abhihugar000011/seleniumjava.git'
+    }
 
     stage('Compile Java') {
-        sh 'javac AutomationDemoSite.java Example1.java'
+        bat 'javac AutomationDemoSite.java Example1.java'
     }
 
     stage('Run AutomationDemoSite') {
-        sh 'java AutomationDemoSite'
+        bat 'java AutomationDemoSite'
     }
 
     stage('Run Example1') {
-        sh 'java Example1'
+        bat 'java Example1'
     }
 }
