@@ -2,12 +2,12 @@ pipeline {
     agent any
     
     environment {
-        // Optional: Store GitHub credentials in Jenkins (recommended)
-        GIT_CREDENTIALS = credentials('GITHUB_CREDENTIALS_ID') // Replace with your Jenkins credentials ID
+        // Define your GitHub credentials ID here (replace with your actual credentials ID from Jenkins)
+        GIT_CREDENTIALS = credentials('github-credentials') 
     }
     
     stages {
-        // Stage 1: Checkout from YOUR repository (not 'your-repo')
+        // Stage 1: Checkout code
         stage('Checkout') {
             steps {
                 checkout([
@@ -16,7 +16,7 @@ pipeline {
                     extensions: [],
                     userRemoteConfigs: [[
                         url: 'https://github.com/abhihugar000011/seleniumjava.git',
-                        credentialsId: 'GITHUB_CREDENTIALS_ID' // Replace with your Jenkins credentials ID
+                        credentialsId: 'github-credentials' // Must match your Jenkins credentials
                     ]]
                 ])
             }
@@ -29,8 +29,8 @@ pipeline {
             }
         }
         
-        // Stage 3: Run TestNG/JUnit tests
-        stage('Run Unit Tests') {
+        // Stage 3: Run tests
+        stage('Test') {
             steps {
                 sh 'mvn test'
             }
@@ -40,18 +40,11 @@ pipeline {
                 }
             }
         }
-        
-        // Stage 4: Run standalone Java program (if needed)
-        stage('Run Normal Java Code') {
-            steps {
-                sh 'java -cp target/classes com.example.MainClass' // Adjust classpath as needed
-            }
-        }
     }
     
     post {
         always {
-            archiveArtifacts artifacts: 'target/**/*.xml', allowEmptyArchive: true
+            archiveArtifacts artifacts: 'target/surefire-reports/**/*.xml', allowEmptyArchive: true
         }
     }
 }
