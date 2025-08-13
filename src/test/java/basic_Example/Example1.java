@@ -6,6 +6,6 @@ public class Example1 {
         for (int i = 1; i <= n; i++) {
             r = i*r;
         }
-        System.out.println(r);
+        System.out.println("Factorial Number is : "+r);
     }
 }
