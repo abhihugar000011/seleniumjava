@@ -1,24 +1,17 @@
 pipeline {
     agent any
     
-    environment {
-        // Define your GitHub credentials ID here (replace with your actual credentials ID from Jenkins)
-        GIT_CREDENTIALS = credentials('github-credentials') 
-    }
-    
     stages {
-        // Stage 1: Checkout code
+        // Stage 1: Checkout code from public repo
         stage('Checkout') {
             steps {
-                checkout([
+                checkout scm: [
                     $class: 'GitSCM',
                     branches: [[name: '*/main']],
                     extensions: [],
                     userRemoteConfigs: [[
-                        url: 'https://github.com/abhihugar000011/seleniumjava.git',
-                        credentialsId: 'github-credentials' // Must match your Jenkins credentials
+                        url: 'https://github.com/abhihugar000011/seleniumjava.git'
                     ]]
-                ])
             }
         }
         
@@ -36,7 +29,10 @@ pipeline {
             }
             post {
                 always {
+                    // Publish test results
                     junit 'target/surefire-reports/**/*.xml'
+                    // Archive test reports
+                    archiveArtifacts artifacts: 'target/surefire-reports/**/*.xml', allowEmptyArchive: true
                 }
             }
         }
@@ -44,7 +40,8 @@ pipeline {
     
     post {
         always {
-            archiveArtifacts artifacts: 'target/surefire-reports/**/*.xml', allowEmptyArchive: true
+            // Optional: Clean up workspace
+            cleanWs()
         }
     }
 }
