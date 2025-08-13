@@ -1,36 +1,36 @@
-pipeline {
-    agent any
+node {
+    // Tools configuration
+    def mvnHome = tool name: 'Maven3', type: 'maven'
+    def jdkHome = tool name: 'JDK17', type: 'jdk'
+    env.PATH = "${jdkHome}/bin:${mvnHome}/bin:${env.PATH}"
 
-
-    // stages {
-    //     stage('Checkout Code') {
-    //         steps {
-    //             git branch: 'main', url: 'https://github.com/yourusername/yourrepo.git'
-    //         }
-    //     }
-
-        stage('Install Dependencies') {
-            steps {
-                sh 'echo "Installing dependencies..."'
-                // Example for Python: sh 'pip install -r requirements.txt'
-                // Example for Node:   sh 'npm install'
-            }
-        }
-
-        stage('Run Automation Script') {
-            steps {
-                sh 'echo "Running automation script..."'
-                // sh 'bash automation.sh' // Replace with your script
-            }
-        }
+    stage('Checkout') {
+        checkout([$class: 'GitSCM',
+                  branches: [[name: '*/main']],
+                  doGenerateSubmoduleConfigurations: false,
+                  extensions: [],
+                  userRemoteConfigs: [[
+                      url: 'https://github.com/abhihugar000011/seleniumjava.git',
+                      credentialsId: 'github-credentials-id'
+                  ]]
+        ])
     }
 
-    post {
-        success {
-            echo 'Pipeline completed successfully!'
-        }
-        failure {
-            echo 'Pipeline failed!'
-        }
+    stage('Build') {
+        sh "${mvnHome}/bin/mvn clean install -DskipTests=true"
+    }
+
+    stage('Run Cucumber Tests') {
+        sh "${mvnHome}/bin/mvn test -Dcucumber.options=\"--plugin pretty --plugin html:target/cucumber-html-report --plugin json:target/cucumber.json\""
+    }
+
+    stage('Publish Reports') {
+        cucumber fileIncludePattern: '**/cucumber.json', sortingMethod: 'ALPHABETICAL'
+    }
+
+    // Post build actions
+    stage('Post Actions') {
+        junit '**/target/surefire-reports/*.xml'
+        archiveArtifacts artifacts: 'target/**/*.html', allowEmptyArchive: true
     }
 }
