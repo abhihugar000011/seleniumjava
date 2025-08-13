@@ -6,13 +6,15 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.testng.Assert;
-import org.testng.annotations.*;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 public class AutomationDemoSite {
 
     WebDriver driver;
 
-    @BeforeClass
+    @BeforeMethod
     public void setUp() {
         driver = new ChromeDriver();
         driver.manage().window().maximize();
@@ -20,24 +22,22 @@ public class AutomationDemoSite {
     }
 
     @Test
-    public void testAlertButton() throws InterruptedException {
+    public void alertTest() throws InterruptedException {
         driver.get("https://demo.automationtesting.in/Alerts.html");
 
-        WebElement alertButton = driver.findElement(By.xpath("//button[contains(text(),'click the button to display an')]"));
-        alertButton.click();
+        WebElement alertbutton = driver.findElement(By.xpath("//button[contains(text(),'alert box')]"));
+        alertbutton.click();
 
         Alert alert = driver.switchTo().alert();
         Thread.sleep(2000);
         alert.accept();
 
         Thread.sleep(2000);
-        Assert.assertTrue(alertButton.isDisplayed(), "Alert button should be visible");
+        Assert.assertTrue(alertbutton.isDisplayed(), "Alert button should be visible");
     }
 
-    @AfterClass
+    @AfterMethod
     public void tearDown() {
-        if (driver != null) {
-            driver.quit();
-        }
+        driver.quit();
     }
 }
