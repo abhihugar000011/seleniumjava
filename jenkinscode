@@ -1,15 +1,52 @@
 pipeline {
     agent any
+    
     stages {
+        // Stage 1: Checkout code from Git
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/abhihugar000011/seleniumjava.git'
+                git branch: 'main', 
+                     url: 'https://github.com/your-repo/your-project.git'
             }
         }
-        stage('Build & Test') {
+        
+        // Stage 2: Build with Maven (compiles Java code)
+        stage('Build') {
             steps {
-                bat 'mvn clean test'
+                sh 'mvn clean compile'
             }
+        }
+        
+        // Stage 3: Run TestNG/JUnit tests
+        stage('Run Unit Tests') {
+            steps {
+                sh 'mvn test'  // Runs TestNG/JUnit tests
+            }
+            post {
+                always {
+                    // Publish JUnit test reports
+                    junit 'target/surefire-reports/**/*.xml'
+                }
+            }
+        }
+        
+        // Stage 4: Execute a standalone Java program
+        stage('Run Normal Java Code') {
+            steps {
+                script {
+                    // Example: Run a Java class from the command line
+                    sh '''
+                    java -cp target/classes com.example.MainClass
+                    '''
+                }
+            }
+        }
+    }
+    
+    post {
+        always {
+            // Optional: Archive test reports
+            archiveArtifacts artifacts: 'target/**/*.xml', allowEmptyArchive: true
         }
     }
 }
